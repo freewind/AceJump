@@ -1,7 +1,7 @@
 <idea-plugin url="https://github.com/johnlindquist/AceJump"
              version="2">
-    <name>AceJump</name>
-    <id>AceJump</id>
+    <name>AceJump-2</name>
+    <id>AceJump-2</id>
 
     <description><![CDATA[
     AceJump allows you to quickly navigate the cursor to any position visible in the editor.
@@ -65,6 +65,15 @@
                                first-keystroke="ctrl SEMICOLON"/>
             <keyboard-shortcut keymap="Mac OS X" first-keystroke="ctrl SEMICOLON"/>
             <keyboard-shortcut keymap="Mac OS X 10.5+" first-keystroke="ctrl SEMICOLON"/>
+        </action>
+        <action id="AceJumpAction_AfterChar"
+                class="com.johnlindquist.acejump.AceJumpAfterCharAction"
+                text="Ace Jump After Char"
+                description="Search and navigate to result">
+            <keyboard-shortcut keymap="$default"
+                               first-keystroke="ctrl QUOTE"/>
+            <keyboard-shortcut keymap="Mac OS X" first-keystroke="ctrl QUOTE"/>
+            <keyboard-shortcut keymap="Mac OS X 10.5+" first-keystroke="ctrl QUOTE"/>
         </action>
     </actions>
 

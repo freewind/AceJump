@@ -13,13 +13,14 @@ import javax.swing.event.ChangeListener
 public class DefaultKeyCommand(val searchBox: SearchBox, val aceFinder: AceFinder, val aceJumper: AceJumper, val textAndOffsetHash: HashMap<String, Int>): AceKeyCommand() {
     override fun execute(keyEvent: KeyEvent) {
         val keyChar: Char = keyEvent.getKeyChar()
+
         if(keyChar == '\b') return
 
         //Find or jump
         if (searchBox.isSearchEnabled) {
             //Find
             aceFinder.addResultsReadyListener(object: ChangeListener{
-                public override fun stateChanged(p0: ChangeEvent) {
+                public override fun stateChanged(e: ChangeEvent) {
                     eventDispatcher?.getMulticaster()?.stateChanged(ChangeEvent(toString()))
                 }
             });
@@ -35,27 +36,27 @@ public class DefaultKeyCommand(val searchBox: SearchBox, val aceFinder: AceFinde
                 char = aceFinder.firstChar + char
                 aceFinder.firstChar = ""
             }
+
             val offset = textAndOffsetHash.get(char)
 
             if (offset != null) {
                 searchBox.popupContainer?.cancel();
+
+                val afterCharOffset = if(aceFinder.isAfterCharMode) 1 else 0
                 if (keyEvent.isShiftDown() && !keyEvent.isMetaDown()) {
-                    aceJumper.setSelectionFromCaretToOffset(offset)
-                    aceJumper.moveCaret(offset)
+                    aceJumper.setSelectionFromCaretToOffset(offset + afterCharOffset)
+                    aceJumper.moveCaret(offset + afterCharOffset)
                 } else {
-                    aceJumper.moveCaret(offset)
+                    aceJumper.moveCaret(offset + afterCharOffset)
                 }
 
                 if (aceFinder.isTargetMode) {
                     aceJumper.selectWordAtCaret()
                 }
-            }
-            else{
+            } else{
                 aceFinder.firstChar = char!!
             }
-
         }
-
     }
 
 

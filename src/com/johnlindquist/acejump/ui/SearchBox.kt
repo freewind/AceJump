@@ -25,43 +25,51 @@ public class SearchBox: JTextField() {
         setTransferHandler(null);
         super<JTextField>.requestFocus()
     }
-    override fun paintBorder(p0: Graphics?) {
+    override fun paintBorder(e: Graphics?) {
     }
 
 
     //todo: I need to really rethink this entire approach
-    override fun processKeyEvent(p0: KeyEvent) {
+    override fun processKeyEvent(e: KeyEvent) {
+
         if (getText()?.length() == 0) {
             //todo: rethink the "isSearchEnabled" state approach. Works great now, could be cleaner
             isSearchEnabled = true
         }
 
+
         var aceKeyCommand: AceKeyCommand? = null
-        if (p0.getID() == KeyEvent.KEY_RELEASED) {
-            aceKeyCommand = preProcessKeyReleasedMap.get(p0.getKeyCode())
+        if (e.getID() == KeyEvent.KEY_RELEASED) {
+            aceKeyCommand = preProcessKeyReleasedMap.get(e.getKeyCode())
         }
 
-        if (p0.getID() == KeyEvent.KEY_PRESSED) {
-            aceKeyCommand = preProcessKeyPressedMap.get(p0.getKeyCode())
+        if (e.getID() == KeyEvent.KEY_PRESSED) {
+
+            aceKeyCommand = preProcessKeyPressedMap.get(e.getKeyCode())
             //prevent "alt" from triggering menu items
-            p0.consume()
+            e.consume()
         }
+
 
         if (aceKeyCommand != null) {
-            aceKeyCommand?.execute(p0)
+            aceKeyCommand?.execute(e)
             return
         }
 
-        super.processKeyEvent(p0)
+        super.processKeyEvent(e)
 
-        if (p0.getID() != KeyEvent.KEY_TYPED) return
+        if (e.getID() != KeyEvent.KEY_TYPED) {
+            return
+        }
 
 
-        if (defaultKeyCommand != null && p0.isConsumed()){
-            defaultKeyCommand?.execute(p0)
+        if (defaultKeyCommand != null && e.isConsumed()){
+            println("### execute defaultKeyCommand")
+            defaultKeyCommand?.execute(e)
         }
 
         if (getText()?.length() == 2) {
+            println("### 2 chars: " + getText())
             try{
                 setText(getText(0, 1))
             }

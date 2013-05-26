@@ -31,13 +31,14 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.wm.impl.IdeFocusManagerImpl
 import com.intellij.openapi.wm.IdeFocusManager
 
-public open class AceJumpAction(): DumbAwareAction() {
+public open class AceJumpAction(val afterCharMode: Boolean = false): DumbAwareAction() {
 
     override public fun update(e: AnActionEvent?) {
         e?.getPresentation()?.setEnabled((e?.getData(PlatformDataKeys.EDITOR)) != null)
     }
-    override public fun actionPerformed(p0: AnActionEvent?) {
-        val actionEvent = p0
+
+    override public fun actionPerformed(anActionEvent: AnActionEvent?) {
+        val actionEvent = anActionEvent
         val project = actionEvent?.getData(PlatformDataKeys.PROJECT) as Project
         val editor = actionEvent?.getData(PlatformDataKeys.EDITOR) as EditorImpl
         val virtualFile = actionEvent?.getData(PlatformDataKeys.VIRTUAL_FILE) as VirtualFile
@@ -45,10 +46,12 @@ public open class AceJumpAction(): DumbAwareAction() {
         val scheme = EditorColorsManager.getInstance()?.getGlobalScheme()
         val font = Font(scheme?.getEditorFontName(), Font.BOLD, scheme?.getEditorFontSize()!!)
         val aceFinder = AceFinder(project, document, editor, virtualFile)
-        val aceJumper = AceJumper(editor, document as DocumentImpl)
+        val aceJumper = AceJumper(editor, document)
         val aceCanvas = AceCanvas()
         val searchBox = SearchBox()
         val textAndOffsetHash = HashMap<String, Int>()
+
+        aceFinder.isAfterCharMode = afterCharMode
 
         fun showJumpers(textPointPairs: List<Pair<String, Point>>?) {
             aceCanvas.jumpInfos = textPointPairs?.reverse()
@@ -77,9 +80,9 @@ public open class AceJumpAction(): DumbAwareAction() {
             val letters = aceFinder.getAllowedCharacters()!!
             var len = letters.length
             var groups = Math.floor(total.toDouble() / len)
-//            print("groups: " + groups.toString())
+            //            print("groups: " + groups.toString())
             val lenMinusGroups = len - groups.toInt()
-//            print("last letter: " + letters.charAt(lenMinusGroups).toString() + "\n")
+            //            print("last letter: " + letters.charAt(lenMinusGroups).toString() + "\n")
 
             for (i in 0..total) {
 
@@ -87,7 +90,7 @@ public open class AceJumpAction(): DumbAwareAction() {
 
                 val iGroup = i - lenMinusGroups
                 val iModGroup = iGroup % len
-//                if(iModGroup == 0) print("================\n")
+                //                if(iModGroup == 0) print("================\n")
                 val i1 = Math.floor(lenMinusGroups.toDouble() + ((i + groups.toInt()) / len)).toInt() - 1
                 if(i >= lenMinusGroups){
                     str += letters.charAt(i1)
@@ -95,7 +98,7 @@ public open class AceJumpAction(): DumbAwareAction() {
                 }else {
                     str += letters.charAt(i).toString()
                 }
-//                print(i.toString() + ": " + str + "     iModGroup:" + iModGroup.toString() + "\n")
+                //                print(i.toString() + ": " + str + "     iModGroup:" + iModGroup.toString() + "\n")
 
 
                 val textOffset: Int = results.get(i)
@@ -118,7 +121,7 @@ public open class AceJumpAction(): DumbAwareAction() {
             aceCanvas.setBounds(0, 0, (viewport?.getWidth())!! + 1000, (viewport?.getHeight())!! + 1000)
             val rootPane: JRootPane? = editor.getComponent().getRootPane()!!
             val locationOnScreen: Point? = SwingUtilities.convertPoint(aceCanvas, (aceCanvas.getLocation()), rootPane)
-            aceCanvas.setLocation(-locationOnScreen!!.x, -locationOnScreen!!.y)
+            aceCanvas.setLocation(-locationOnScreen!!.x, -locationOnScreen.y)
         }
 
         fun configureSearchBox() {
@@ -152,16 +155,20 @@ public open class AceJumpAction(): DumbAwareAction() {
                 defaultKeyCommand?.addListener(showJumpObserver)
                 searchBox.defaultKeyCommand = defaultKeyCommand
 
-
-                //todo: refactor - edge cases...
-                val pressedSemi: AceKeyCommand = ChangeToTargetMode(searchBox, aceFinder)
+                // todo: refactor - edge cases...
+                val pressedSemi: AceKeyCommand = ChangeToBeforeCharMode(searchBox, aceFinder)
                 pressedSemi.addListener(showJumpObserver)
                 searchBox.addPreProcessPressedKey(KeyEvent.VK_SEMICOLON, pressedSemi)
+
+                // todo: refactor - edge cases...
+                val pressedQuote: AceKeyCommand = ChangeToAfterCharMode(searchBox, aceFinder)
+                pressedQuote.addListener(showJumpObserver)
+                searchBox.addPreProcessPressedKey(KeyEvent.VK_QUOTE, pressedQuote)
             }
 
             setupSearchBoxKeys()
             searchBox.setFont(font)
-            val popupBuilder: ComponentPopupBuilder? = JBPopupFactory.getInstance()?.createComponentPopupBuilder(searchBox as JComponent, searchBox)
+            val popupBuilder: ComponentPopupBuilder? = JBPopupFactory.getInstance()?.createComponentPopupBuilder(searchBox: JComponent, searchBox)
             popupBuilder?.setCancelKeyEnabled(true)
             val popup = (popupBuilder?.createPopup() as AbstractPopup?)
             popup?.show(guessBestLocation(editor))
@@ -172,7 +179,6 @@ public open class AceJumpAction(): DumbAwareAction() {
                 if (SystemInfo.isMac) {
                     dimension?.setSize(dimension!!.width * 2, dimension!!.height * 2)
                 }
-
             }
 
 
@@ -181,10 +187,10 @@ public open class AceJumpAction(): DumbAwareAction() {
             searchBox.setSize(dimension as Dimension)
             searchBox.setFocusable(true)
             searchBox.addFocusListener(object : FocusListener {
-                public override fun focusGained(p0: FocusEvent) {
+                public override fun focusGained(e: FocusEvent) {
                     addAceCanvas()
                 }
-                public override fun focusLost(p0: FocusEvent) {
+                public override fun focusLost(e: FocusEvent) {
                     exit()
                 }
             })

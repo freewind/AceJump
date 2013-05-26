@@ -24,9 +24,9 @@ public open class AceJumper(var editor: EditorImpl, var document: DocumentImpl) 
         var startWordOffset = Math.max(0, ranges.get(0).getStartOffset())
         var endWordOffset = Math.min(ranges.get(0).getEndOffset(), document.getTextLength())
 
-/*        if(ranges.size() == 2 && editor.getSelectionModel().getSelectionStart() == startWordOffset && editor.getSelectionModel().getSelectionEnd() == endWordOffset)
-            startWordOffset = Math.max(0, ranges.get(1).getStartOffset())
-        endWordOffset = Math.min(ranges.get(1).getEndOffset(), document.getTextLength())*/
+        /*        if(ranges.size() == 2 && editor.getSelectionModel().getSelectionStart() == startWordOffset && editor.getSelectionModel().getSelectionEnd() == endWordOffset)
+                    startWordOffset = Math.max(0, ranges.get(1).getStartOffset())
+                endWordOffset = Math.min(ranges.get(1).getEndOffset(), document.getTextLength())*/
 
         editor.getSelectionModel().setSelection(startWordOffset, endWordOffset);
     }

@@ -15,13 +15,13 @@ public class AceCanvas: JComponent() {
         public set
     var colorPair = Pair<Color?, Color?>(Color.BLACK, Color.WHITE)
         public set
-    var lineSpacing:Float = 0.toFloat()
+    var lineSpacing: Float = 0.toFloat()
         public set
-    var lineHeight:Int = 0
+    var lineHeight: Int = 0
         public set
 
 
-    class FontBasedMeasurements() {
+    inner class FontBasedMeasurements() {
         var font = getFont()
         val fontWidth = getFontMetrics(font)?.stringWidth("w")!!
         val fontHeight = font?.getSize()!!

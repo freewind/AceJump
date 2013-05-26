@@ -11,7 +11,7 @@ public class ExpandResults(val searchBox: SearchBox, val aceFinder: AceFinder, a
     override fun execute(keyEvent: KeyEvent) {
         if(searchBox.getText()?.length() == 0){
             aceFinder.addResultsReadyListener(object:ChangeListener{
-                public override fun stateChanged(p0: ChangeEvent) {
+                public override fun stateChanged(e: ChangeEvent) {
                     eventDispatcher?.getMulticaster()?.stateChanged(ChangeEvent(toString()));
                 }
             });
